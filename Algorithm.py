@@ -6,34 +6,45 @@ def search(node):
     global shortestPath
     global neighbourDistances
     n = node.getNeighbours()
+    neighbourDistances = {}
+    shortestPath = []
+
     if n[0].getState() != 'Blank' and n[1].getState() != 'Blank' and n[2].getState() != 'Blank' and n[3].getState() != 'Blank':
-        t.sleep(5)
-        pass
-   
-    elif node.getState() == 'End':
-        print("End found!")
-        return int(shortestPath)
+            # for n in node.getNeighbours():
+                # n.setDistance(node.getDistance()+1)
 
-    elif node.getState() == 'Wall' or\
-        node.getState() == 'fixedWall' or\
-        node.getState() == 'Visited':
-        pass
-    
-    else:
-        neighbourDistances = {}
-        shortestPath = math.inf
-        for neighbour in node.getNeighbours():
-            neighbour.setDistance(node.getDistance()+1)
             node.setState('Visited')
+            return False
 
-            if neighbour.getDistance() < shortestPath:
-                neighbourDistances[neighbour.getDistance()] = neighbour
-                shortestPath = neighbour.getDistance()
-        
-        for neighbour in node.getNeighbours():
-            if neighbour.getDistance() == node.getDistance()+1:
+    for n in node.getNeighbours():
+        n.setDistance(node.getDistance()+1)
+        if n.getState() == 'Blank':
+            node.setState('currentNode')
+            n.setState('Tentativa')
+            pg.display.update()
+            # t.sleep(0.05)
+
+
+            # if n.getDistance() < shortestPath:
+            #         neighbourDistances[n.getDistance()] = n
+            #         shortestPath = n.getDistance()
+                    
+            if n.getDistance() == node.getDistance()+1:
+                node.setState('Visited')
                 pg.display.update()
-                search(neighbour)
-                t.sleep(0.10)
+            # node.setState('Visited')
+            # pg.display.update()
+            return False
+        
+        elif n.getState() == 'End':
+            print("End found!")
+            print(n.getDistance())
+            return True
 
-        pg.display.update()
+        elif n.getState() == 'Visited' or n.getState() == 'Tentativa':
+            pass
+
+        elif n.getState() == 'Wall' or\
+            n.getState() == 'fixedWall':
+            return False
+
