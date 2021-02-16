@@ -1,6 +1,6 @@
 import pygame as pg
 import time as t
-import random, math, json
+import math, random, json
 from pygame import *
 import tkinter as tk
 from tkinter import filedialog
@@ -27,11 +27,13 @@ class Node:
             screen.blit(txt, rct)
 
     def setState(self,newState):
+        global startingPosition
+        global startExists
+        global endExists
+
         self.state = newState
 
         if self.state == 'Start':
-            global startingPosition
-            global startExists
 
             unvisited.remove(self)
             startingPosition = self.gridpos
@@ -42,41 +44,37 @@ class Node:
             screen.blit(txt, rct)
             startExists = True
 
-        if self.state == 'End':
-            global endExists
+        elif self.state == 'End':
             pg.draw.rect(screen,(200,0,0),Rect(self.x,self.y, gridSize,gridSize))
             endExists = True
 
-        if self.state == 'Blank':
+        elif self.state == 'Blank':
             pg.draw.rect(screen,(200,200,200),Rect(self.x,self.y, gridSize,gridSize))
             pg.draw.rect(screen,(0,0,0),Rect(self.x,self.y, gridSize,gridSize),1)
             unvisited.append(self) # Todos os Nodes 'Blank' são marcados como não visitados
 
-        if self.state == 'Visited':
+        elif self.state == 'Visited':
             try:
                 rct = pg.draw.rect(screen,(50+self.getDistance(), 10, 200),Rect(self.x,self.y, gridSize,gridSize))
             except:
                 rct = pg.draw.rect(screen,(255,10,200),Rect(self.x,self.y, gridSize,gridSize))
-
-            # rct = pg.draw.rect(screen,(0,0,200),Rect(self.x,self.y, gridSize,gridSize))
             font  = pg.font.Font('freesansbold.ttf',10)
             txt = font.render(str(self.getDistance()),True, (0, 255, 0))
             screen.blit(txt, rct)
-        
 
-        if self.state == 'Wall':
+        elif self.state == 'Wall':
             pg.draw.rect(screen,(150,150,150),Rect(self.x,self.y, gridSize,gridSize))
         
-        if self.state == 'fixedWall':
+        elif self.state == 'fixedWall':
             pg.draw.rect(screen,(30,15,15),Rect(self.x,self.y, gridSize,gridSize))
 
-        if self.state == 'currentNode':
+        elif self.state == 'currentNode':
             rct = pg.draw.rect(screen,(255,0,255),Rect(self.x,self.y, gridSize,gridSize))
 
-        if self.state == 'Tentativa':
+        elif self.state == 'Tentativa':
             rct = pg.draw.rect(screen,(204,102,0),Rect(self.x,self.y, gridSize,gridSize))
 
-        if self.state == 'Path':
+        elif self.state == 'Path':
             rct = pg.draw.rect(screen,(255,255,0),Rect(self.x,self.y, gridSize,gridSize))
 
     def getNeighbours(self):
@@ -117,48 +115,111 @@ class Node:
 def write(txt):
     pg.display.set_caption(txt)
 
+def initiate():
+    if startExists == False:
+        pass
+    elif endExists == False:
+        pass
+    else:
+        global shortestPath
+        print("Iniciando Procura...")
+
+        for n in grid[startingPosition].getNeighbours():
+            if n.getState() == 'Blank':
+                n.setState('Tentativa')
+                n.setParent(grid[startingPosition])
+                n.setDistance(1)
+            pg.display.update()
+
+        searching = True
+        shortestPath = 999
+        while searching == True:
+            for item in grid:
+                if grid[item].getState() == 'Tentativa' and grid[item].getDistance() != float('inf'):
+                    if search(grid[item]) == False:
+                        for n in grid[item].getNeighbours():
+                            if n.getState() == 'Blank':
+                                n.setDistance(grid[item].getDistance()+1)
+                                n.setParent(grid[item])
+                                n.setState('Tentativa')
+                                pg.display.update()
+
+
+                            elif n.getState() == 'End':
+                                n.setDistance(grid[item].getDistance()+1)
+                                n.setParent(grid[item])
+                                search(n)
+                                print(n.getDistance(), shortestPath)
+                                if n.getDistance() < shortestPath:
+                                    print('Short distance updated(',shortestPath,'->',n.getDistance(),')')
+                                    shortestPath = n.getDistance()
+                                    caminho(n)
+                                    searching = False
+                                    break
+                if not searching:
+                    break
+
 def search(node):
     global neighbourDistances
     n = node.getNeighbours()
     neighbourDistances = {}
 
     if n[0].getState() != 'Blank' and n[1].getState() != 'Blank' and n[2].getState() != 'Blank' and n[3].getState() != 'Blank':
-            node.setState('Visited')
-            # pg.display.update()
-            return False
+        node.setState('Visited')
+        return False
 
-    for n in node.getNeighbours():
-        n.setDistance(node.getDistance()+1)
-        if n.getState() == 'Blank':
-            node.setState('currentNode')
-            n.setParent(node)
-            n.setState('Tentativa')
-            # pg.display.update()
-                    
-            if n.getDistance() == node.getDistance()+1:
-                node.setState('Visited')
-                # pg.display.update()
+    elif node.getState() == 'End':
+        return node.getNeighbours()
 
-            return False
-        
-        elif n.getState() == 'End':
-            pg.display.update()
-            n.setParent(node)
-            print("End found!")
-            print(n.getDistance())
-            # pg.display.update()
-            return False
+    else:
+        for n in node.getNeighbours():
+            n.setDistance(node.getDistance()+1)
+            if n.getState() == 'Blank':
+                node.setState('currentNode')
+                n.setParent(node)
+                n.setState('Tentativa')
+                        
+                if n.getDistance() == node.getDistance()+1:
+                    node.setState('Visited')
 
-        elif n.getState() == 'Visited' or n.getState() == 'Tentativa':
-            # pg.display.update()
-            pass
+                return False
+            
+            elif n.getState() == 'End':
+                pg.display.update()
+                n.setParent(node)
+                print("End found!")
+                print(n.getDistance())
+                return False
 
-        elif n.getState() == 'Wall' or\
-            n.getState() == 'fixedWall':
-            # pg.display.update()
-            return False
+            elif n.getState() == 'Visited' or n.getState() == 'Tentativa':
+                pass
+
+            elif n.getState() == 'Wall' or\
+                n.getState() == 'fixedWall':
+                return False
 
 
+def caminho(node):
+        parent = node.getParent()
+        for item in grid:
+            if grid[item].getState() == 'Path':
+                grid[item].setState('Blank')
+
+        for i in range(node.getDistance()):
+            if parent != None:
+                parent.setState('Path')
+                pg.display.update()
+                parent = parent.getParent()
+            t.sleep(0.005)
+            if parent.getState() == 'Start':
+                break
+
+def generateObstacles():
+    for i in range(50):
+        randXY = (random.randrange(1,63),random.randrange(1,35))
+        if startExists == True and endExists == True and grid[randXY].state == "Blank":
+            grid[randXY].setState("Wall")
+        pg.display.update()
 
 def generateGrid():
     global grid
@@ -190,73 +251,6 @@ def generateGrid():
                 grid[newNode.getGridpos()] = newNode
                 gdpos += 1
 
-
-def initiate():
-    if startExists == False:
-        pass
-    elif endExists == False:
-        pass
-    else:
-        global shortestPath
-        print("Iniciando Procura...")
-
-        for n in grid[startingPosition].getNeighbours():
-            if n.getState() == 'Blank':
-                n.setState('Tentativa')
-                n.setParent(grid[startingPosition])
-                n.setDistance(1)
-            pg.display.update()
-
-        searching = True
-        shortestPath = 999
-        while searching == True:
-            # pg.display.update()
-            for item in grid:
-                if grid[item].getState() == 'Tentativa' and grid[item].getDistance() != float('inf'):
-                    if search(grid[item]) == False:
-                        for n in grid[item].getNeighbours():
-                            if n.getState() == 'Blank':
-                                n.setDistance(grid[item].getDistance()+1)
-                                n.setParent(grid[item])
-                                n.setState('Tentativa')
-                                pg.display.update()
-
-
-                            elif n.getState() == 'End':
-                                n.setDistance(grid[item].getDistance()+1)
-                                n.setParent(grid[item])
-                                # pg.display.update()
-                                print(n.getDistance(), shortestPath)
-                                if n.getDistance() < shortestPath:
-                                    print('Short distance updated(',shortestPath,'->',n.getDistance(),')')
-                                    shortestPath = n.getDistance()
-                                    Pathfind(n)
-                                    searching = False
-                                    break
-                if not searching:
-                    break
-
-def Pathfind(node):
-        parent = node.getParent()
-        for item in grid:
-            if grid[item].getState() == 'Path':
-                grid[item].setState('Blank')
-
-        for i in range(node.getDistance()):
-            if parent != None:
-                parent.setState('Path')
-                pg.display.update()
-                parent = parent.getParent()
-            t.sleep(0.005)
-            if parent.getState() == 'Start':
-                break
-
-def generateObstacles():
-    for i in range(50):
-        randXY = (random.randrange(1,63),random.randrange(1,33))
-        if startExists == True and endExists == True and grid[randXY].state == "Blank":
-            grid[randXY].setState("Wall")
-        pg.display.update()
 
 def onMousePress(button):
     pos = pg.mouse.get_pos()
@@ -332,18 +326,18 @@ def update():
                     root = tk.Tk()
                     root.withdraw()
                     try:
-                        Main()
                         mapFile = filedialog.askopenfile()
                         mapFile = json.load(mapFile)
+                        Main()
                         for i in mapFile:
                             for c in i:
                                 x = int(i[i.index('(')+1:i.index(',')])
                                 y = int(i[i.index(' ')+1:i.rindex(')')])
                             grid[(x,y)].setState(mapFile[i])
+
                     except Exception as e:
                         print(e)
                         pass
-
 def Main():
     global startExists
     global endExists
@@ -375,6 +369,7 @@ def Main():
     generateGrid()
     pg.display.update()
 
-Main()
-update()
-pg.quit()
+if __name__ == '__main__':
+    Main()
+    update()
+    pg.quit()
