@@ -1,8 +1,10 @@
 # Pathfinder
-Pathfinding Algorithm in Python using pygame
 
 >PT:
->
+>>
+>>*Requires PyGame and Tkinter!*
+>>Implementação e visualização do algoritmo A* de busca de caminhos em Python usando PyGame.
+>>
 >>Comandos:
 >>* 'O': Abrir mapa de obstáculos
 >>* 'L': Salvar mapa de obstáculos
@@ -13,7 +15,10 @@ Pathfinding Algorithm in Python using pygame
 >>* 'Mouse 2': Remover obstáculo
 >
 >ENG:
->
+>>
+>>*Requires PyGame and Tkinter!*
+>>Implementation and visualization of the A* pathfinding algorithm in Python using PyGame.
+>>
 >>Commands:
 >>* 'O': Open obstacle map
 >>* 'L': Save obstacle map
