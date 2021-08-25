@@ -295,7 +295,7 @@ def Main():
     
     pg.display.set_icon(icon)
     screen = pg.display.set_mode((1280,720))
-    pg.display.set_caption("Implementação do Algoritmo A* de Pathfinding em Python - David de Oliveira Lima")
+    pg.display.set_caption("Implementação do Algoritmo Dijkstra de Pathfinding em Python - David de Oliveira Lima")
     pg.display.init()
     pg.font.init()
     screen.fill((200,200,200))
