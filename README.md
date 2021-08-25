@@ -3,7 +3,7 @@
 >PT:
 >>
 >>*Requires PyGame and Tkinter!*
->>Implementação e visualização do algoritmo A* de busca de caminhos em Python usando PyGame.
+>>Implementação e visualização do algoritmo de Dijkstra de busca de caminhos em Python usando PyGame.
 >>
 >>Comandos:
 >>* 'O': Abrir mapa de obstáculos
@@ -17,7 +17,7 @@
 >ENG:
 >>
 >>*Requires PyGame and Tkinter!*
->>Implementation and visualization of the A* pathfinding algorithm in Python using PyGame.
+>>Implementation and visualization of the Dijkstra pathfinding algorithm in Python using PyGame.
 >>
 >>Commands:
 >>* 'O': Open obstacle map
