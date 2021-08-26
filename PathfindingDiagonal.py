@@ -111,7 +111,7 @@ class Node:
     def getNeighbours(self):
         top_left = grid[self.grid_pos[0]-1, self.grid_pos[1]-1]
         top = grid[self.grid_pos[0], self.grid_pos[1]-1]
-        top_right = grid[self.grid_pos[0]+1, self.grid_pos[1]+1]
+        top_right = grid[self.grid_pos[0]+1, self.grid_pos[1]-1]
         right = grid[self.grid_pos[0]+1, self.grid_pos[1]]
         bot_right = grid[self.grid_pos[0]+1, self.grid_pos[1]+1]
         bottom = grid[self.grid_pos[0], self.grid_pos[1]+1]
