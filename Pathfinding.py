@@ -6,11 +6,8 @@ Entre o período de // Between the period of
               2020 - 2021
 '''
 
-import random
-import json
-import json
+import random, json
 import pygame as pg
-import time as t
 from pygame import *
 import tkinter as tk
 from tkinter import filedialog
@@ -201,12 +198,12 @@ def iniciarBusca():
                     else:
                         node.setState('Visitado')
 
-                    pg.display.update()
+            pg.display.update()
 
             if len(procura_futura) == 0 and searching == True:
                 searching = False
                 print("Não encontrado!")
-                break
+                return
 
 
 def generatePath(node):
@@ -218,9 +215,8 @@ def generatePath(node):
             parent.setState('Path')
             pg.display.update()
             parent = parent.parent
-        t.sleep(0.005)
         if parent.state == 'Comeco':
-            break
+            return
 
 
 def generateObstacles():
@@ -330,7 +326,7 @@ def update():
 
                         except Exception as e:
                             print(e)
-                            pass
+
                     elif pg.key.name(event.key) == 'o':
                         root = tk.Tk()
                         root.withdraw()
@@ -345,7 +341,6 @@ def update():
                                 grid[(x, y)].setState(mapFile[i])
                         except Exception as e:
                             print(e)
-                            pass
 
 
 if __name__ == '__main__':
