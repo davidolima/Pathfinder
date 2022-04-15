@@ -1,12 +1,7 @@
-'''
-Feito por David de Oliveira Lima //
-Made by David de Oliveira Lima
+# Djikstra Pathfinding Algorithm in Python
 
-Entre o período de // Between the period of
-              2020 - 2021
-'''
-
-import random, json
+import random
+import json
 import pygame as pg
 from pygame import *
 import tkinter as tk
@@ -19,8 +14,8 @@ class Node:
         self.y = y
         self.grid_pos = grid_pos
         self.state = state
-        self.distance = distance
         self.parent = parent
+        self.distance = distance
 
         if self.state == 'Vazio':
             pg.draw.rect(screen, (200, 200, 200), Rect(
@@ -29,9 +24,9 @@ class Node:
                 self.x, self.y, gridSize, gridSize), 1)
 
         elif self.state == 'muroFixo':
-            rct = pg.draw.rect(screen, (30, 15, 15), Rect(
-                self.x, self.y, gridSize, gridSize))
+            pg.draw.rect(screen, (30, 15, 15), Rect(self.x, self.y, gridSize, gridSize))
             font = pg.font.Font('freesansbold.ttf', 8)
+
             if self.grid_pos[0] == 0 or self.grid_pos[0] == 63:
                 txt = font.render(
                     str(self.grid_pos[1]), True, (0, 255, 255), (30, 15, 15))
@@ -42,8 +37,8 @@ class Node:
                 txt = font.render(str(self.grid_pos), True,
                                   (0, 255, 255), (30, 15, 15))
 
-            screen.blit(
-                txt, (self.grid_pos[0] * 20 + 6, self.grid_pos[1]*20 + 6))
+            pos = self.grid_pos[0] * 20 + 6, self.grid_pos[1]*20 + 6
+            screen.blit(txt, pos)
 
     def setState(self, newState):
         global startingPosition
@@ -76,12 +71,11 @@ class Node:
                 self.x, self.y, gridSize, gridSize), 1)
 
         elif self.state == 'Visitado':
-            try:
-                rct = pg.draw.rect(
-                    screen, (50+self.distance, 10, 200), Rect(self.x, self.y, gridSize, gridSize))
-            except:
-                rct = pg.draw.rect(screen, (255, 10, 200), Rect(
-                    self.x, self.y, gridSize, gridSize))
+            cor = (max(min(self.distance, 255), 50), 10, 200)
+            rct = pg.draw.rect(screen,
+                               cor,
+                               Rect(self.x, self.y, gridSize, gridSize))
+
             font = pg.font.Font('freesansbold.ttf', 10)
             txt = font.render(str(self.distance), True, (0, 255, 0))
             screen.blit(
@@ -120,39 +114,41 @@ def Main():
     global startExists
     global endExists
     global running
-    global searching
+    global is_searching
     global screen
     global startingPosition
 
+    screen = pg.display.set_mode((1280, 720))
+
+    startingPosition = (0, 0)
+    startExists = False
+    endExists = False
+    running = True
+    is_searching = False
+
     icon = pg.Surface((32, 32))
-    icon.set_colorkey((0, 0, 0))
     rawicon = pg.image.load('ico.ico')
+
+    icon.set_colorkey((0, 0, 0))
     for i in range(0, 32):
         for j in range(0, 32):
             icon.set_at((i, j), rawicon.get_at((i, j)))
 
     pg.display.set_icon(icon)
-    screen = pg.display.set_mode((1280, 720))
     pg.display.set_caption(
         "Implementação do Algoritmo Dijkstra de Pathfinding em Python - David de Oliveira Lima")
     pg.display.init()
     pg.font.init()
     screen.fill((200, 200, 200))
 
-    startingPosition = (0, 0)
-    startExists = False
-    endExists = False
-    running = True
-    searching = False
-
     generateGrid()
 
 def iniciarBusca():
-    global searching
+    global is_searching
     global procura_futura
 
-    if startExists != False and endExists != False:
-        searching = True
+    if startExists and endExists:
+        is_searching = True
         procura_futura = []
 
         print("Iniciando Procura...")
@@ -165,13 +161,13 @@ def iniciarBusca():
                 procura_futura.append(node)
 
             elif node.state == 'Fim':
-                searching = False
+                is_searching = False
                 node.distance = 1
                 print(node.grid_pos, node.distance)
 
             pg.display.update()
 
-        while searching:
+        while is_searching:
             procura_atual = procura_futura.copy()
             procura_futura.clear()
             for node in procura_atual:
@@ -185,23 +181,25 @@ def iniciarBusca():
                         node.setState('Visitado')
 
                     elif node_vizinho.state == 'Fim':
-                        searching = False
+                        is_searching = False
                         procura_atual.clear()
+
                         node_vizinho.distance = node.distance + 1
                         node_vizinho.parent = node
-                        print(
-                            "Fim Encontrado!",
-                            "\nLocalização:", node_vizinho.grid_pos,
-                            "\nDistância:", node_vizinho.distance)
+
+                        print("Fim Encontrado!",
+                              "\nLocalização:", node_vizinho.grid_pos,
+                              "\nDistância:", node_vizinho.distance)
                         generatePath(node_vizinho)
+                        limpar()
 
                     else:
                         node.setState('Visitado')
 
             pg.display.update()
 
-            if len(procura_futura) == 0 and searching == True:
-                searching = False
+            if len(procura_futura) == 0 and is_searching:
+                is_searching = False
                 print("Não encontrado!")
                 return
 
@@ -222,7 +220,7 @@ def generatePath(node):
 def generateObstacles():
     for i in range(50):
         randXY = (random.randrange(1, 63), random.randrange(1, 35))
-        if startExists == True and endExists == True and grid[randXY].state == "Vazio":
+        if startExists and endExists and grid[randXY].state == "Vazio":
             grid[randXY].setState("Muro")
         pg.display.update()
 
@@ -233,7 +231,7 @@ def generateGrid():
     gridSize = 20
     grid = {}
 
-    rct = pg.draw.rect(screen, (0, 0, 0), Rect(0, 0, 1280, 720))
+    pg.draw.rect(screen, (0, 0, 0), Rect(0, 0, 1280, 720))
     font = pg.font.Font('freesansbold.ttf', 50)
     txt = font.render('Gerando grade...', True, (0, 255, 0))
     screen.blit(txt, (((pg.display.get_window_size()[
@@ -254,22 +252,48 @@ def generateGrid():
                 grid[newNode.grid_pos] = newNode
     pg.display.update()
 
+def limpar():
+    global startExists
+    global endExists
+    global running
+    global is_searching
+    global screen
+    global startingPosition
+
+    grid.clear()
+    procura_futura.clear()
+
+    startingPosition = (0, 0)
+    startExists = False
+    endExists = False
+    is_searching = False
+
+def reiniciar():
+    limpar()
+    # pg.display.init()
+    screen.fill((200, 200, 200))
+    generateGrid()
+
 
 def onMousePress(button):
     pos = pg.mouse.get_pos()
     for item in grid.values():
         if item.x < pos[0] < (item.x+20) and item.y < pos[1] < (item.y+20):
-            if startExists == False and endExists == False and item.state == "Vazio" and button == 'm1':
+            if not startExists and not endExists \
+               and item.state == "Vazio" and button == 'm1':
                 global startIndex
                 item.setState("Comeco")
 
-            elif startExists == True and endExists == False and item.state == "Vazio" and button == 'm1':
+            elif startExists and not endExists \
+                    and item.state == "Vazio" and button == 'm1':
                 item.setState("Fim")
 
-            elif startExists == endExists == True and item.state == "Muro" and button == 'm2':
+            elif startExists and endExists \
+                    and item.state == "Muro" and button == 'm2':
                 item.setState("Vazio")
 
-            elif startExists == endExists == True and item.state == "Vazio" and button == 'm1':
+            elif startExists and endExists \
+                    and item.state == "Vazio" and button == 'm1':
                 item.setState("Muro")
 
 
@@ -277,49 +301,51 @@ def update():
     global running
 
     while running:
-        if not searching:
-            if startExists == False:
+        if not is_searching:
+            if not startExists:
                 pg.display.set_caption("Adicionar ponto de partida")
 
-            elif endExists == False:
+            elif not endExists:
                 pg.display.set_caption("adicionar ponto a ser procurado")
 
-            elif startExists == True and endExists == True:
+            elif startExists and endExists:
                 pg.display.set_caption(
                     "Desenhe muros e/ou pressione enter para começar")
 
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
+        for evento in pg.event.get():
+            if evento.type == pg.QUIT:
                 running = False
 
-            elif not searching:
+            elif not is_searching:
                 if pg.mouse.get_pressed()[0]:
                     onMousePress('m1')
                 elif pg.mouse.get_pressed()[2]:
                     onMousePress('m2')
 
-                elif event.type == pg.KEYDOWN:
-                    if pg.key.name(event.key) == 'return':
+                elif evento.type == pg.KEYDOWN:
+                    if pg.key.name(evento.key) == 'return':
                         iniciarBusca()
-                    elif pg.key.name(event.key) == 'backspace':
+                    elif pg.key.name(evento.key) == 'backspace':
                         generateObstacles()
-                    elif pg.key.name(event.key) == 'escape':
+                    elif pg.key.name(evento.key) == 'escape':
                         running = False
-                    elif pg.key.name(event.key) == 'r':
-                        Main()
-                    elif pg.key.name(event.key) == 'u':
+                    elif pg.key.name(evento.key) == 'r':
+                        reiniciar()
+                    elif pg.key.name(evento.key) == 'u':
                         pg.display.update()
-                    elif pg.key.name(event.key) == 'i':
+                    elif pg.key.name(evento.key) == 'i':
                         root = tk.Tk()
                         root.withdraw()
                         try:
                             mapFile = filedialog.asksaveasfile(
-                                filetypes=[('Json Files', '*.json')], defaultextension=[('Json Files', '*.json')])
+                                filetypes=[('Json Files', '*.json')],
+                                defaultextension=[('Json Files', '*.json')])
                             info = {}
+
                             for i in grid.values():
                                 if str(i.state) != 'Vazio' and str(i.state) != 'muroFixo':
                                     info[str(i.grid_pos)] = str(i.state)
-                            print(info)
+
                             info = json.dumps(info, indent=4)
                             mapFile.write(info)
                             mapFile.close()
@@ -327,7 +353,7 @@ def update():
                         except Exception as e:
                             print(e)
 
-                    elif pg.key.name(event.key) == 'o':
+                    elif pg.key.name(evento.key) == 'o':
                         root = tk.Tk()
                         root.withdraw()
                         try:

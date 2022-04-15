@@ -6,13 +6,14 @@ Entre o período de // Between the period of
               2020 - 2021
 '''
 
-import pygame as pg
-import time as t
-import random
 import json
-from pygame import *
+import random
+import time as t
 import tkinter as tk
 from tkinter import filedialog
+
+import pygame as pg
+from pygame import *
 
 
 class Node:
@@ -136,58 +137,33 @@ def iniciarBusca():
         procura_futura = []
 
         print("Iniciando Procura...")
-
-        # Adicionar os Nodes ao redor do ponto inicial para a lista de tentativa futura // Add the nodes around the starting point to the procura_futura(future_search) list
         for node in grid[startingPosition].getNeighbours():
-            if node.state == 'Vazio':                                       # Se o node for vazio // If node is blank
-                # Mudar seu estado para "Tentativa" // Change it's state to "Try"
+            if node.state == 'Vazio':
                 node.setState('Tentativa')
-                # Colocar o node inicial como parente deste vizinho // Set the starting node as this neighbour's parent.
                 node.setParent(grid[startingPosition])
-                # Colocar a distância do vizinho como 1 // Set the neighbour distance to 1
                 node.setDistance(1)
-                # Colocar o node vizinho na lista de tentativa futura // Append the neighbouring node to the procura_futura list
                 procura_futura.append(node)
-            # Atualizar tela // Update display.
             pg.display.update()
 
         while searching:
-            # Nodes que serão procurados nessa recursão são pegos de procura_futura // Nodes which are going to be tested in this recursion are taken from procura_futura
             procura_atual = procura_futura.copy()
-            # procura_futura é limpada para que possamos adicionar os nodes da proxima recursão // procura_futura is cleared so that we can add the nodes which are going to be tested in the next recursion
             procura_futura.clear()
-            # Para cada node em procura_atual // For each node in procura_atual (current_search)
             for node in procura_atual:
-                # Para cada vizinho deste node em procura_atual // For each neighbour of these nodes in procura_atual
                 for node_vizinho in node.getNeighbours():
-                    # Se o estado do vizinho for vazio // If the neighbour's state is blank
                     if node_vizinho.state == 'Vazio':
-                        # Colocar o node atual como parente do vizinho // Set the neighbour's parent as the current node
                         node_vizinho.setParent(node)
-                        # Mudar o estado do vizinho para "Tentativa" // Change the neighbour's state to "Try"
                         node_vizinho.setState('Tentativa')
-                        # Colocar a distância do vizinho como a distância do node atual + 1 // Set the neighbour distance to the current node's distance + 1
                         node_vizinho.setDistance(node.distance + 1)
-                        # Colocar o vizinho na lista de tentativa futura // Append the neighbouring node to the "future search" list
                         procura_futura.append(node_vizinho)
-                        # Colocar o estado do node atual como "visitado" // Set the current node's state to "Visitado"("Visited")
                         node.setState('Visitado')
-                        # Atualizar tela // Update display.
                         pg.display.update()
 
-                    # Se o Node vizinho tiver o estado igual a "Fim" // If the neighbour's state equals to "Fim"("End")
                     elif node_vizinho.state == 'Fim':
-                        # Procura está completa // Search is done
                         searching = False
-                        # Limpar a lista de tentativas atual // Clear the "current_search" list
                         procura_atual.clear()
-                        # Colocar a distância do vizinho como a distância do node atual + 1 // Set the neighbour distance to the current node's distance + 1
                         node_vizinho.setDistance(node.distance + 1)
-                        # Colocar o node atual como parente do vizinho // Set the neighbour's parent as the current node
                         node_vizinho.setParent(node)
-                        # Imprimir na tela a localização e a distância do ponto final // Print the location and the distance of the End Node
                         print(node_vizinho.grid_pos, node_vizinho.distance)
-                        # Gerar caminho ente o ponto final e o inicial // Generate the path between the End point and the Starting point
                         generatePath(node_vizinho)
 
                     else:
@@ -196,27 +172,17 @@ def iniciarBusca():
                 pg.display.update()
 
 
-# Gerar caminho ente o ponto final e o inicial // Generate the path between the End point and the Starting point
 def generatePath(node):
-    # Criar variável "parente" // Create "parente"("parent") variable
-    parent = node.parent
+        parent = node.parent
 
-    # Para i vezes a distância entre o ponto final e o inicial // for i times the distance between the starting and end point
-    for i in range(node.distance):
-        # Se o parente é diferente de None // If parent is different than None
-        if parent != None:
-            # Mudar o estado do parente para "Path"("Caminho") // Change parent's state to "Path"
-            parent.setState('Path')
-            # Atualizar tela // Update display
-            pg.display.update()
-            # Parente é igual ao parente do parente do node atual // Parent now equals the parent of the parent of the current node
-            parent = parent.parent
-        # Esperar 0.005 segundo para vermos o caminho ser feito // Wait 0.005 so we can see the path being made
-        t.sleep(0.005)
-        # Se o estado do parente é "Comeco" // If the parent's state is "Comeco" ("Start")
-        if parent.state == 'Comeco':
-            break                                                       # Terminar // Finish
-
+        for i in range(node.distance):
+                if parent != None:
+                        parent.setState('Path')
+                        pg.display.update()
+                        parent = parent.parent
+                t.sleep(0.005)
+                if parent.state == 'Comeco':
+                    break
 
 def generateObstacles():
     for i in range(50):
@@ -239,15 +205,13 @@ def generateGrid():
     font = pg.font.Font('freesansbold.ttf', 50)
     txt = font.render('Gerando grade...', True, (0, 255, 0))
     screen.blit(txt, (((pg.display.get_window_size()[0]//2) - (txt.get_width()/2)), (
-        pg.display.get_window_size()[1]//2) - (txt.get_height()/2)))  # Centralizar Texto
+        pg.display.get_window_size()[1]//2) - (txt.get_height()/2)))
     pg.display.update()
 
     for x in range(1280//gridSize):
         for y in range(720//gridSize):
-            # Draw Walls on edges
             if x == 0 or x == 63 or y == 0 or y == 35:
-                newNode = Node(None, gdpos, float('inf'), x *
-                               gridSize, y*gridSize, (x, y), "muroFixo")
+                newNode = Node(None, gdpos, float('inf'), x * gridSize, y*gridSize, (x, y), "muroFixo")
                 gridlist.append(newNode)
                 grid[newNode.grid_pos] = newNode
                 gdpos += 1
@@ -295,8 +259,6 @@ def update():
             pg.display.set_caption(
                 "Desenhe muros e/ou pressione enter para começar")
 
-        # elif searching == True:
-        #     pg.display.set_caption("Procurando pelo ponto...")
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
