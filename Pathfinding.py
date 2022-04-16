@@ -71,7 +71,7 @@ class Node:
                 self.x, self.y, gridSize, gridSize), 1)
 
         elif self.state == 'Visitado':
-            cor = (max(min(self.distance, 255), 50), 10, 200)
+            cor = (self.distance % (255 - 50 + 1) + 50, 10, 200)
             rct = pg.draw.rect(screen,
                                cor,
                                Rect(self.x, self.y, gridSize, gridSize))
@@ -259,6 +259,7 @@ def limpar():
     global is_searching
     global screen
     global startingPosition
+    global procura_futura
 
     grid.clear()
     procura_futura.clear()
